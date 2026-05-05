@@ -22,7 +22,6 @@ from config import (
 
 
 class SentenceCategory(Enum):
-    """Categories for RTI response sentences."""
     INFORMATIVE = "informative"
     DENIAL = "denial"
     PROCEDURAL = "procedural"
@@ -32,7 +31,6 @@ class SentenceCategory(Enum):
 
 @dataclass
 class ClassifiedSentence:
-    """A sentence with its classification and metadata."""
     text: str
     category: SentenceCategory
     confidence: float
@@ -42,7 +40,6 @@ class ClassifiedSentence:
 
 @dataclass
 class StructuredRTIResponse:
-    """Structured representation of an RTI response."""
     original_text: str
     informative_sentences: List[ClassifiedSentence] = field(default_factory=list)
     denial_sentences: List[ClassifiedSentence] = field(default_factory=list)
@@ -52,7 +49,6 @@ class StructuredRTIResponse:
     section_references: Dict[str, List[str]] = field(default_factory=dict)
     
     def to_dict(self) -> dict:
-        """Convert to dictionary for JSON serialization."""
         return {
             'original_text': self.original_text,
             'informative': [{'text': s.text, 'confidence': s.confidence} 
@@ -70,7 +66,6 @@ class StructuredRTIResponse:
         }
     
     def get_stats(self) -> dict:
-        """Get statistics about the classified response."""
         total = (len(self.informative_sentences) + len(self.denial_sentences) + 
                 len(self.procedural_sentences) + len(self.evasive_sentences) + 
                 len(self.neutral_sentences))
@@ -194,7 +189,6 @@ def classify_sentence(sentence: str) -> ClassifiedSentence:
             best_category = category
             best_keywords = keywords
     
-    # If no strong signal, classify as neutral
     if best_score < 0.1:
         best_category = SentenceCategory.NEUTRAL
         best_score = 0.5

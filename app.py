@@ -37,7 +37,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for styling
+# styling
 st.markdown("""
 <style>
     /* Main container styling */
@@ -117,7 +117,7 @@ st.markdown("""
         border: 1px solid #ef4444;
     }
     
-    .tag-procedural {
+    .tag-procedural {-[=]
         background-color: #fef3c7;
         color: #92400e;
         border: 1px solid #f59e0b;
