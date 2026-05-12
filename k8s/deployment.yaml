@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rti-app
+  namespace: rti-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rti-app
+  template:
+    metadata:
+      labels:
+        app: rti-app
+    spec:
+      containers:
+      - name: rti-app
+        image: singhriya10/rti-summariser:v1
+        ports:
+        - containerPort: 8501
+        env:
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: GEMINI_API_KEY
