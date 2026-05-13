@@ -10,6 +10,36 @@ import streamlit as st
 import io
 import os
 import sys
+import threading
+from prometheus_client import start_http_server
+from prometheus_client import Counter, Histogram, REGISTRY
+
+def get_metric(metric_type, name, description):
+    try:
+        return metric_type(name, description)
+    except ValueError:
+        return REGISTRY._names_to_collectors[name]
+
+DOCS_PROCESSED = get_metric(
+    Counter,
+    'rti_pdfs_processed',
+    'Total RTI documents processed'
+)
+
+SUMMARIES_GENERATED = get_metric(
+    Counter,
+    'rti_summaries_generated',
+    'Total summaries generated'
+)
+
+REQUEST_LATENCY = get_metric(
+    Histogram,
+    'rti_request_duration_seconds',
+    'Request processing duration'
+)
+
+# Start metrics server on port 8000 in background
+threading.Thread(target=lambda: start_http_server(8000), daemon=True).start()
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -422,6 +452,7 @@ def main():
                 st.session_state['original_text'] = text
                 st.session_state['analysis_done'] = True
                 
+                DOCS_PROCESSED.inc()
                 st.success("✅ Analysis complete!")
                 
             except Exception as e:
@@ -472,6 +503,7 @@ def main():
                     time.sleep(1)  # Small delay
                     # Use FULL TEXT + fact anchors (NOT classification-filtered text)
                     result = generate_ultra_short_summary(full_text, stored_api_key, fact_anchors)
+                    SUMMARIES_GENERATED.inc()
                     st.session_state['current_summary_result'] = result
                     st.session_state['current_summary_type'] = 'ultra_short'
                     st.rerun()
@@ -481,6 +513,7 @@ def main():
                 with st.spinner("Generating citizen-friendly summary..."):
                     time.sleep(1)
                     result = generate_citizen_summary(full_text, stored_api_key, fact_anchors)
+                    SUMMARIES_GENERATED.inc()
                     st.session_state['current_summary_result'] = result
                     st.session_state['current_summary_type'] = 'citizen_friendly'
                     st.rerun()
@@ -490,6 +523,7 @@ def main():
                 with st.spinner("Generating technical summary..."):
                     time.sleep(1)
                     result = generate_technical_summary(full_text, stored_api_key, fact_anchors)
+                    SUMMARIES_GENERATED.inc()
                     st.session_state['current_summary_result'] = result
                     st.session_state['current_summary_type'] = 'technical'
                     st.rerun()
