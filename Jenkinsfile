@@ -21,7 +21,7 @@ pipeline {
         }
         stage("Deploy") {
             steps {
-                sh "kubectl apply -f k8s/deployment.yaml -n rti-app"
+                sh "kubectl apply -f k8s/deployment.yaml -n rti-app --validate=false --kubeconfig=/var/jenkins_home/.kube/config"
             }
         }
     }
