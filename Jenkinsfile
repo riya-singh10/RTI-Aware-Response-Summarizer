@@ -3,25 +3,24 @@ pipeline {
     stages {
         stage("Checkout") {
             steps {
-                echo "Checking out code..."
                 checkout scm
             }
         }
-        stage("Build Docker Image") {
+        stage("Build") {
             steps {
-                echo "Building Docker image..."
                 sh "docker build -t singhriya10/rti-summariser:latest ."
             }
         }
-        stage("Push to DockerHub") {
+        stage("Push") {
             steps {
-                echo "Pushing to DockerHub..."
-                sh "docker push singhriya10/rti-summariser:latest"
+                withCredentials([usernamePassword(credentialsId: "dockerhub-creds", usernameVariable: "DOCKER_USER", passwordVariable: "DOCKER_PASS")]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                    sh "docker push singhriya10/rti-summariser:latest"
+                }
             }
         }
-        stage("Deploy to Kubernetes") {
+        stage("Deploy") {
             steps {
-                echo "Deploying to Kubernetes..."
                 sh "kubectl apply -f k8s/deployment.yaml -n rti-app"
             }
         }
